@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Winter Simulator - Predictions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0a1128;
+            --accent-color: #d62828;
+            --text-color: #f0f0f0;
+            --secondary-color: #003566;
+            --highlight-color: #ffd60a;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--accent-color);
+            box-shadow: 0 0 15px rgba(214, 40, 40, 0.7);
+            position: relative;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(214, 40, 40, 0.7);
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            color: var(--highlight-color);
+            margin-top: 5px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card {
+            background-color: rgba(0, 53, 102, 0.8);
+            border-radius: 5px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 1px solid var(--accent-color);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(214, 40, 40, 0.4);
+        }
+        
+        .card-header {
+            background-color: rgba(214, 40, 40, 0.8);
+            padding: 15px;
+            border-bottom: 2px solid var(--highlight-color);
+        }
+        
+        .card-header h2 {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-header h2 i {
+            margin-right: 10px;
+        }
+        
+        .card-body {
+            padding: 20px;
+            color: var(--text-color);
+        }
+        
+        .form-label {
+            color: var(--highlight-color);
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .form-range {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .form-range::-webkit-slider-thumb {
+            background: var(--accent-color);
+        }
+        
+        .form-range::-moz-range-thumb {
+            background: var(--accent-color);
+        }
+        
+        .form-control, .form-select {
+            background-color: rgba(10, 17, 40, 0.7);
+            border: 1px solid var(--accent-color);
+            color: var(--text-color);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: rgba(10, 17, 40, 0.9);
+            border-color: var(--highlight-color);
+            box-shadow: 0 0 0 0.25rem rgba(255, 214, 10, 0.25);
+            color: var(--text-color);
+        }
+        
+        .btn-danger {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 12px 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .btn-danger:hover {
+            background-color: var(--highlight-color);
+            color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(255, 214, 10, 0.7);
+        }
+        
+        .btn-danger:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn-danger:hover:before {
+            left: 100%;
+        }
+        
+        .result-container {
+            display: none;
+        }
+        
+        h1, h2 {
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(214, 40, 40, 0.7);
+        }
+        
+        .alert-danger {
+            background-color: rgba(214, 40, 40, 0.2);
+            border-left: 5px solid var(--accent-color);
+            color: var(--text-color);
+        }
+        
+        .value-display {
+            color: var(--highlight-color);
+            font-weight: bold;
+        }
+        
+        .loader {
+            border: 6px solid var(--secondary-color);
+            border-top: 6px solid var(--accent-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stats-card {
+            border-left: 3px solid var(--accent-color);
+            background-color: rgba(0, 53, 102, 0.5);
+            transition: all 0.3s;
+        }
+        
+        .stats-card:hover {
+            background-color: rgba(0, 53, 102, 0.8);
+            box-shadow: 0 0 15px rgba(214, 40, 40, 0.4);
+        }
+        
+        .text-muted {
+            color: var(--text-color) !important;
+            opacity: 0.7;
+        }
+        
+        .counter {
+            font-family: 'Courier New', monospace;
+            background-color: black;
+            color: red;
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin: 0 5px;
+            font-weight: bold;
+        }
+        
+        .display-6 {
+            color: var(--highlight-color);
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 214, 10, 0.5);
+        }
+        
+        .btn-outline-light, .btn-outline-danger {
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+        
+        .btn-outline-light:hover {
+            background-color: var(--highlight-color);
+            border-color: var(--highlight-color);
+            color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(255, 214, 10, 0.5);
+        }
+        
+        .btn-outline-danger {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .btn-outline-danger:hover {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(214, 40, 40, 0.5);
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 1.5s;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+        
+        .slide-in {
+            animation: slideIn 1s;
+        }
+        
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+        
+        .blink {
+            animation: blinker 2s linear infinite;
+        }
+        
+        /* Global footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: var(--text-color);
+            border-top: 2px solid var(--accent-color);
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <header class="fade-in">
+        <h1><i class="fas fa-radiation"></i> Nuclear Winter Predictor</h1>
+        <p class="subtitle">CALCULATE DEVASTATING EFFECTS OF NUCLEAR WARFARE</p>
+        <div id="countdown">Emergency Response Time: <span class="counter" id="days">00</span>:<span class="counter" id="hours">00</span>:<span class="counter" id="minutes">00</span>:<span class="counter" id="seconds">00</span></div>
+    </header>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h2><i class="fas fa-sliders-h"></i> Prediction Parameters</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="predict-form">
+                            <div class="mb-3">
+                                <label for="nukes_used" class="form-label">Number of Nuclear Weapons</label>
+                                <input type="range" class="form-range" id="nukes_used" name="nukes_used" min="1" max="50" value="10">
+                                <div class="d-flex justify-content-between">
+                                    <span>1</span>
+                                    <span class="value-display" id="nukes_used_display">10</span>
+                                    <span>50</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="avg_yield_kt" class="form-label">Average Yield (kilotons)</label>
+                                <input type="range" class="form-range" id="avg_yield_kt" name="avg_yield_kt" min="15" max="1000" value="300">
+                                <div class="d-flex justify-content-between">
+                                    <span>15kt</span>
+                                    <span class="value-display" id="avg_yield_kt_display">300kt</span>
+                                    <span>1000kt</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="target_city_population" class="form-label">Target City Population</label>
+                                <select class="form-select" id="target_city_population" name="target_city_population">
+                                    <option value="100000">Small City (100,000)</option>
+                                    <option value="500000">Medium City (500,000)</option>
+                                    <option value="1000000">Large City (1,000,000)</option>
+                                    <option value="5000000" selected>Major City (5,000,000)</option>
+                                    <option value="10000000">Megacity (10,000,000)</option>
+                                    <option value="20000000">Largest Metropolis (20,000,000)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="urbanization_level" class="form-label">Urbanization Level</label>
+                                <input type="range" class="form-range" id="urbanization_level" name="urbanization_level" min="0.4" max="1" step="0.05" value="0.75">
+                                <div class="d-flex justify-content-between">
+                                    <span>40%</span>
+                                    <span class="value-display" id="urbanization_level_display">75%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="soot_emission_Tg" class="form-label">Soot Emission (Teragrams)</label>
+                                <input type="range" class="form-range" id="soot_emission_Tg" name="soot_emission_Tg" min="0.1" max="10" step="0.1" value="5">
+                                <div class="d-flex justify-content-between">
+                                    <span>0.1Tg</span>
+                                    <span class="value-display" id="soot_emission_Tg_display">5Tg</span>
+                                    <span>10Tg</span>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-danger btn-lg"><i class="fas fa-radiation"></i> PREDICT</button>
+                            </div>
+                        </form>
+                        
+                        <div id="error-container" class="alert alert-danger mt-3" style="display: none;">
+                            <strong><i class="fas fa-exclamation-triangle"></i> ERROR:</strong> <span id="error-message"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="result-container" id="result-container">
+                    <div class="card mb-4 slide-in">
+                        <div class="card-header">
+                            <h2><i class="fas fa-chart-line"></i> Simulation Results</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="loader" id="loader"></div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="card stats-card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-skull"></i> Human Lives Lost</h5>
+                                            <p class="display-6" id="lives-lost">--</p>
+                                            <p class="text-muted">Million people</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="card stats-card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-chart-pie"></i> GDP Impact</h5>
+                                            <p class="display-6" id="gdp-impact">--</p>
+                                            <p class="text-muted">Percent reduction</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="card stats-card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-temperature-low"></i> Global Temperature Drop</h5>
+                                            <p class="display-6" id="temp-drop">--</p>
+                                            <p class="text-muted">Degrees Celsius</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="card stats-card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="fas fa-drumstick-bite"></i> Famine Risk</h5>
+                                            <p class="display-6" id="famine-risk">--</p>
+                                            <p class="text-muted">Million people</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mt-3">
+                                <a href="/" class="btn btn-outline-light"><i class="fas fa-home"></i> Return to Dashboard</a>
+                                <a href="/download" class="btn btn-outline-danger"><i class="fas fa-download"></i> Download Full Simulation Data (CSV)</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card fade-in">
+                        <div class="card-header">
+                            <h2><i class="fas fa-exclamation-triangle"></i> Warning</h2>
+                        </div>
+                        <div class="card-body">
+                            <p class="small">This simulation is based on theoretical models and is intended for educational purposes only. Real nuclear winter scenarios may differ significantly.</p>
+                            <p class="small blink">ALWAYS FOLLOW OFFICIAL EMERGENCY PROTOCOLS</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 National Emergency Response System | <span class="blink">Jai Hind </span></p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Create star background
+        function createStars() {
+            const stars = document.getElementById('stars');
+            const count = 200;
+            
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                const size = Math.random() * 2;
+                
+                star.style.position = 'absolute';
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.background = 'white';
+                star.style.borderRadius = '50%';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.opacity = Math.random();
+                star.style.animation = `twinkle ${Math.random() * 5 + 3}s infinite`;
+                
+                stars.appendChild(star);
+            }
+        }
+        
+        // Update value displays for range inputs
+        function updateValueDisplay(inputId) {
+            const input = document.getElementById(inputId);
+            const display = document.getElementById(inputId + '_display');
+            
+            switch(inputId) {
+                case 'nukes_used':
+                    display.textContent = input.value;
+                    break;
+                case 'avg_yield_kt':
+                    display.textContent = input.value + 'kt';
+                    break;
+                case 'urbanization_level':
+                    display.textContent = Math.round(input.value * 100) + '%';
+                    break;
+                case 'soot_emission_Tg':
+                    display.textContent = input.value + 'Tg';
+                    break;
+                default:
+                    display.textContent = input.value;
+            }
+        }
+        
+        // Countdown timer
+        function startCountdown() {
+            const startDate = new Date("2025-01-01").getTime();
+            
+            setInterval(function() {
+                const now = new Date().getTime();
+                const distance = now - startDate;
+                
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                document.getElementById("days").textContent = days.toString().padStart(2, '0');
+                document.getElementById("hours").textContent = hours.toString().padStart(2, '0');
+                document.getElementById("minutes").textContent = minutes.toString().padStart(2, '0');
+                document.getElementById("seconds").textContent = seconds.toString().padStart(2, '0');
+            }, 1000);
+        }
+        
+        // Add animation to elements
+        function addAnimations() {
+            // Add random blinking effect to various elements
+            const elements = document.querySelectorAll('.card-header');
+            
+            elements.forEach(element => {
+                if (Math.random() > 0.7) {
+                    setInterval(() => {
+                        element.style.boxShadow = Math.random() > 0.5 ? '0 0 15px rgba(214, 40, 40, 0.7)' : 'none';
+                    }, Math.random() * 2000 + 1000);
+                }
+            });
+        }
+        
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            startCountdown();
+            addAnimations();
+            
+            // Initialize value displays
+            const rangeInputs = ['nukes_used', 'avg_yield_kt', 'urbanization_level', 'soot_emission_Tg'];
+            
+            rangeInputs.forEach(id => {
+                updateValueDisplay(id);
+                
+                document.getElementById(id).addEventListener('input', function() {
+                    updateValueDisplay(id);
+                });
+            });
+            
+            document.getElementById('predict-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const nukesUsed = parseInt(document.getElementById('nukes_used').value);
+                const avgYield = parseInt(document.getElementById('avg_yield_kt').value);
+                const targetPopulation = parseInt(document.getElementById('target_city_population').value);
+                const urbanization = parseFloat(document.getElementById('urbanization_level').value);
+                const sootEmission = parseFloat(document.getElementById('soot_emission_Tg').value);
+
+                // Validation checks
+                if (
+                    isNaN(nukesUsed) || nukesUsed < 1 || nukesUsed > 50 ||
+                    isNaN(avgYield) || avgYield < 15 || avgYield > 1000 ||
+                    isNaN(targetPopulation) || targetPopulation < 100000 ||
+                    isNaN(urbanization) || urbanization < 0.4 || urbanization > 1 ||
+                    isNaN(sootEmission) || sootEmission < 0.1 || sootEmission > 10
+                ) {
+                    document.getElementById('error-message').textContent = 'Please ensure all inputs are filled and within allowed ranges.';
+                    document.getElementById('error-container').style.display = 'block';
+                    document.getElementById('loader').style.display = 'none';
+                    return;
+                }
+
+                // Hide error and show loader
+                document.getElementById('error-container').style.display = 'none';
+                document.getElementById('loader').style.display = 'block';
+
+                // Simulate data processing
+                setTimeout(() => {
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('result-container').style.display = 'block';
+                    document.getElementById('lives-lost').textContent = (nukesUsed * 0.5).toFixed(1);
+                    document.getElementById('gdp-impact').textContent = (nukesUsed * 2).toFixed(1);
+                    document.getElementById('temp-drop').textContent = (sootEmission * 0.6).toFixed(2);
+                    document.getElementById('famine-risk').textContent = ((sootEmission * 100) * urbanization).toFixed(0);
+                }, 2000);
+            });
+            
+            // Direct button click handler (in case form submission isn't working)
+            document.querySelector('.btn-danger').addEventListener('click', function() {
+                document.getElementById('predict-form').dispatchEvent(new Event('submit'));
+            });
+            
+            // Add styles to document dynamically
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes twinkle {
+                    0% { opacity: 0.2; }
+                    50% { opacity: 1; }
+                    100% { opacity: 0.2; }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Winter Simulation Command Center</title>
+    <style>
+        :root {
+            --primary-color: #0a1128;
+            --accent-color: #d62828;
+            --text-color: #f0f0f0;
+            --secondary-color: #003566;
+            --highlight-color: #ffd60a;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            background-image: url('/api/placeholder/1920/1080');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--accent-color);
+            box-shadow: 0 0 15px rgba(214, 40, 40, 0.7);
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(214, 40, 40, 0.7);
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            color: var(--highlight-color);
+            margin-top: 5px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .card {
+            background-color: rgba(0, 53, 102, 0.8);
+            border-radius: 5px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 1px solid var(--accent-color);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(214, 40, 40, 0.4);
+        }
+        
+        .card-header {
+            background-color: rgba(214, 40, 40, 0.8);
+            padding: 15px;
+            border-bottom: 2px solid var(--highlight-color);
+        }
+        
+        .card-header h2 {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-header h2 i {
+            margin-right: 10px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .visualization {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .visualization img {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid var(--highlight-color);
+            box-shadow: 0 0 15px rgba(255, 214, 10, 0.3);
+        }
+        
+        .download-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 20px 0;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-block;
+            text-decoration: none;
+            border-radius: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .download-btn:hover {
+            background-color: var(--highlight-color);
+            color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(255, 214, 10, 0.7);
+        }
+        
+        .download-btn:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .download-btn:hover:before {
+            left: 100%;
+        }
+        
+        .tab-container {
+            margin-top: 30px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--accent-color);
+        }
+        
+        .tab-btn {
+            background-color: transparent;
+            border: none;
+            color: var(--text-color);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .tab-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--accent-color);
+            border-top: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .alert-panel {
+            background-color: rgba(214, 40, 40, 0.2);
+            border-left: 5px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-panel h3 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+        
+        .alert-panel ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        
+        .alert-panel ul li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .alert-panel ul li:before {
+            content: "→";
+            color: var(--highlight-color);
+            position: absolute;
+            left: -20px;
+            top: 0;
+        }
+        
+        .blink {
+            animation: blinker 2s linear infinite;
+        }
+        
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+        
+        .radar-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+        
+        .radar-screen {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: rgba(0, 53, 102, 0.5);
+            border: 2px solid var(--highlight-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .radar-sweep {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            top: 0;
+            left: 50%;
+            transform-origin: left center;
+            background: linear-gradient(90deg, transparent, rgba(255, 214, 10, 0.5));
+            animation: sweep 4s infinite linear;
+        }
+        
+        @keyframes sweep {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .loading-bar {
+            height: 20px;
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            width: 0%;
+            background-color: var(--accent-color);
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: loadingAnimation 3s ease-in-out infinite;
+        }
+        
+        @keyframes loadingAnimation {
+            0% {
+                width: 0%;
+            }
+            50% {
+                width: 70%;
+            }
+            100% {
+                width: 0%;
+            }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: var(--text-color);
+            border-top: 2px solid var(--accent-color);
+            margin-top: 40px;
+        }
+        
+        .counter {
+            font-family: 'Courier New', monospace;
+            background-color: black;
+            color: red;
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin: 0 5px;
+            font-weight: bold;
+        }
+        
+        .blackout-info {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--accent-color);
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .blackout-info h3 {
+            color: var(--highlight-color);
+            border-bottom: 1px solid var(--highlight-color);
+            padding-bottom: 10px;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 1.5s;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+        
+        .slide-in {
+            animation: slideIn 1s;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <header class="fade-in">
+        <h1><i class="fas fa-radiation"></i> War Outcome Prediction and Awareness</h1>
+        <p class="subtitle">CRITICAL SAFETY INFORMATION - FOR ALL CITIZENS</p>
+        <div id="countdown">Emergency Response Time: <span class="counter" id="days">00</span>:<span class="counter" id="hours">00</span>:<span class="counter" id="minutes">00</span>:<span class="counter" id="seconds">00</span></div>
+    </header>
+    
+    <div class="container">
+        <div class="card fade-in">
+    <div class="card-header">
+        <h2><i class="fas fa-cloud-sun-rain"></i> What is Nuclear Winter?</h2>
+    </div>
+    <div class="card-body">
+        <p>
+            A nuclear winter is a severe global climate event that may follow large-scale nuclear war. The explosions and resulting fires send massive amounts of soot into the upper atmosphere, blocking sunlight. This leads to a dramatic drop in temperature, disrupting agriculture, causing food shortages, and threatening the survival of ecosystems and human life.
+        </p>
+        <p>
+            Our simulation predicts the environmental and economic impacts of such a scenario, helping governments, researchers, and the public understand potential outcomes and prepare for disaster management.
+        </p>
+    </div>
+</div>
+        <div class="card slide-in">
+            
+            <div class="card-header">
+                <h2><i class="fas fa-download"></i> Simulation Data</h2>
+            </div>
+            <div class="card-body">
+                <p>Access the complete nuclear winter simulation dataset for detailed analysis.</p>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+                <a href="/download" class="download-btn">
+                    <i class="fas fa-download"></i> Download Simulation CSV
+                </a>
+                <a href="/predict" class="download-btn">
+                     Go to Prediction
+                </a>
+            </div>
+        </div>
+        
+        <div class="tab-container fade-in">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="openTab(event, 'visualization')">Visualizations</button>
+                <button class="tab-btn" onclick="openTab(event, 'precautions')">War Precautions</button>
+                <button class="tab-btn" onclick="openTab(event, 'blackout')">Blackout Information</button>
+                
+            </div>
+            
+            <div id="visualization" class="tab-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-line"></i> Variable Relationships</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="visualization">
+                            <img src="{{ url_for('static', filename='pairplot.png') }}" alt="Variable Relationships">
+                            <p>Correlation matrix showing relationships between key nuclear winter variables including weapon yield, detonation altitude, and atmospheric conditions.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-temperature-low"></i> Soot Emission vs. Global Temperature Drop</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="visualization">
+                            <img src="{{ url_for('static', filename='soot_temp.png') }}" alt="Soot Emission vs. Global Temperature Drop">
+                            <p>Analysis of how atmospheric soot levels from nuclear explosions correlate with global temperature changes over time.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-bar"></i> Distributions</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="visualization">
+                            <img src="{{ url_for('static', filename='distribution.png') }}" alt="Distributions">
+                            <p>Statistical distributions of key parameters in the nuclear winter simulation model.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-pie"></i> GDP Impact by Nukes Used</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="visualization">
+                            <img src="{{ url_for('static', filename='boxplot.png') }}" alt="GDP Impact by Nukes Used">
+                            <p>Economic impact analysis showing projected GDP reduction correlated with the number and yield of nuclear weapons deployed.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="precautions" class="tab-content">
+                <div class="alert-panel">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Emergency Safety Guide</h3>
+                    <div class="radar-container">
+                        <div class="radar-screen">
+                            <div class="radar-sweep"></div>
+                        </div>
+                    </div>
+                    <p>It is essential for citizens to be fully prepared to handle any potential war or emergency situation. This guide will help keep you and your family safe.</p>
+                    
+                    <h4><i class="fas fa-first-aid"></i> 1. Prepare an Emergency Kit:</h4>
+                    <ul>
+                        <li><strong>Identity documents:</strong> Keep copies of Aadhar card, ration card, PAN card, etc.</li>
+                        <li><strong>Essential medicines:</strong> Pain relievers, fever medication, ORS, antiseptic, bandages</li>
+                        <li><strong>Food supplies:</strong> Dry rations, biscuits, flattened rice (chiwda), ready-to-eat food</li>
+                        <li><strong>Water:</strong> At least 5–6 liters per person</li>
+                        <li><strong>Equipment:</strong> Torch, batteries, power bank, whistle</li>
+                        <li><strong>Cash</strong> (ATM services may be disrupted)</li>
+                        <li><strong>Radio</strong> (battery-powered)</li>
+                    </ul>
+                    
+                    <h4><i class="fas fa-users"></i> 2. Family Safety Plan:</h4>
+                    <ul>
+                        <li>Decide on a safe location where the entire family should gather during an emergency</li>
+                        <li>Be aware of nearby <strong>evacuation shelters</strong></li>
+                        <li>During evacuation, give priority to <strong>women, elderly, and children</strong></li>
+                    </ul>
+                    
+                    <h4><i class="fas fa-shield-alt"></i> 3. Self-Defense Measures:</h4>
+                    <ul>
+                        <li>Fully cooperate with authorities during blackouts. Avoid using inverters or lights during a blackout.</li>
+                        <li>If you have a <strong>licensed weapon</strong>, use it <strong>only for self-defense</strong></li>
+                        <li>Keep household items ready for protection, such as sticks, iron rods, chili powder or spray</li>
+                        <li>Form a <strong>'local safety group'</strong> with 4–5 trustworthy neighbors</li>
+                    </ul>
+                    
+                    <h4><i class="fas fa-broadcast-tower"></i> 4. Follow Government Instructions:</h4>
+                    <ul>
+                        <li>Rely only on official or trusted news sources (e.g., <strong>DD News</strong>, <strong>PIB</strong>)</li>
+                        <li>Actively participate in <strong>blood donation camps</strong> organized during wartime</li>
+                        <li>Do <strong>not spread or believe</strong> in any rumors</li>
+                        <li>Stay in contact with authorities such as the <strong>Tehsildar, Police Station Officer, or Panchayat Representative</strong></li>
+                    </ul>
+                    
+                    <h4><i class="fas fa-exclamation-circle"></i> 5. What NOT to Do During War:</h4>
+                    <ul>
+                        <li>Do <strong>not take photos or videos</strong> of border or military activities</li>
+                        <li>Do <strong>not share confidential information</strong> on social media</li>
+                        <li>Do <strong>not go near any strategic site</strong> without permission from the army or police</li>
+                    </ul>
+                    
+                    <h4><i class="fas fa-volume-up"></i> 6. Recognize Local Warning Signals:</h4>
+                    <ul>
+                        <li>Respond immediately to <strong>sirens, loudspeakers, and radio announcements</strong></li>
+                        <li>In border areas, if you hear <strong>nighttime gunfire</strong>, go to a secure place inside your home (like a bathroom or basement)</li>
+                    </ul>
+                    
+                    <p class="blink">In times of war, <strong>patience and vigilance</strong> are your greatest weapons. Prioritize the safety of your family and always <strong>trust the national security system</strong>.</p>
+                    <p>This guide can <strong>save lives</strong> — please <strong>share it with your family and neighbors</strong>.</p>
+                    <p class="blink"><strong>Jai Hind (Victory to India).</strong></p>
+                </div>
+            </div>
+            
+            <div id="blackout" class="tab-content">
+                <div class="blackout-info">
+                    <h3><i class="fas fa-lightbulb"></i> Blackout Protocol</h3>
+                    
+                    <div class="alert-panel">
+                        <ul>
+                            <li>Stay indoors and <strong>away from windows</strong>. If driving, <strong>pull over</strong>, turn off the lights, and <strong>stay in place</strong>.</li>
+                            <li><strong>Turn off all indoor and outdoor lights</strong> during the alert. This includes disconnecting <strong>inverters or backup power sources</strong>.</li>
+                            <li>When the <strong>blackout is announced or sirens sound</strong>, <strong>turn off all gas/electric appliances</strong>.</li>
+                            <li>Ensure constant supervision of <strong>children, elderly, and pets</strong>.</li>
+                            <li>Do <strong>not use phones or LED devices near windows</strong>.</li>
+                            <li>Use <strong>heavy curtains</strong> or cover windows with <strong>cardboard/panels</strong>.</li>
+                            <li>Do <strong>not spread unverified information</strong> on WhatsApp or social media.</li>
+                        </ul>
+                    </div>
+                    
+                    <h4><i class="fas fa-battery-full"></i> Preparation Before Blackout:</h4>
+                    <ul>
+                        <li><strong>Charge your phone and power bank</strong> the night before.</li>
+                        <li>Keep <strong>basic/emergency supplies ready</strong>:
+                            <ul>
+                                <li>Battery or solar-powered flashlight/torch, radio, glow stick</li>
+                                <li>Valid ID cards</li>
+                                <li>Prepare a <strong>family emergency kit</strong>: water, dry food, basic medicines</li>
+                            </ul>
+                        </li>
+                        <li><strong>Be aware of alert signals</strong>:
+                            <ul>
+                                <li>Learn siren signals (e.g., long continuous = alert; short bursts = all clear)</li>
+                                <li>Stay tuned to official updates via <strong>radio/TV</strong> (like Akashvani, Doordarshan)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Prepare a safe zone</strong>:
+                            <ul>
+                                <li>Identify a safe internal room or basement as a shelter</li>
+                                <li>Practice a <strong>family drill</strong>: Turn off lights and gather in the safe area within 1–2 minutes</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    
+                    <h4><i class="fas fa-phone-alt"></i> Emergency Contact Information:</h4>
+                    <ul>
+                        <li><strong>Police:</strong> 112</li>
+                        <li><strong>Fire:</strong> 101</li>
+                        <li><strong>Ambulance:</strong> 120</li>
+                    </ul>
+                    
+                    <h4><i class="fas fa-exclamation-triangle"></i> Important Notices:</h4>
+                    <ul>
+                        <li class="blink"><strong>Do not use elevators from 7 PM to 8 PM</strong>. Disable elevators to avoid inconvenience during blackout.</li>
+                        <li><strong>Inform and prepare the elderly and children</strong> in advance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 National Emergency Response System | <span class="blink">Jai Hind </span></p>
+    </footer>
+
+    <script>
+        // Create star background
+        function createStars() {
+            const stars = document.getElementById('stars');
+            const count = 200;
+            
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                const size = Math.random() * 2;
+                
+                star.style.position = 'absolute';
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.background = 'white';
+                star.style.borderRadius = '50%';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.opacity = Math.random();
+                star.style.animation = `twinkle ${Math.random() * 5 + 3}s infinite`;
+                
+                stars.appendChild(star);
+            }
+        }
+        
+        // Tab functionality
+        function openTab(evt, tabName) {
+            const tabcontent = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            
+            const tablinks = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+        
+        // Countdown timer
+        function startCountdown() {
+            const startDate = new Date("2025-01-01").getTime();
+            
+            setInterval(function() {
+                const now = new Date().getTime();
+                const distance = now - startDate;
+                
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                document.getElementById("days").textContent = days.toString().padStart(2, '0');
+                document.getElementById("hours").textContent = hours.toString().padStart(2, '0');
+                document.getElementById("minutes").textContent = minutes.toString().padStart(2, '0');
+                document.getElementById("seconds").textContent = seconds.toString().padStart(2, '0');
+            }, 1000);
+        }
+        
+        // Add animation to visualizations
+        function animateVisualizations() {
+            const visualizations = document.querySelectorAll('.visualization img');
+            
+            visualizations.forEach((img, index) => {
+                img.style.opacity = '0';
+                img.style.transform = 'translateY(20px)';
+                img.style.transition = 'opacity 1s ease, transform 1s ease';
+                
+                setTimeout(() => {
+                    img.style.opacity = '1';
+                    img.style.transform = 'translateY(0)';
+                }, 300 * index);
+            });
+        }
+        
+        // Add random blinking effect to various elements
+        function addRandomBlink() {
+            const elements = document.querySelectorAll('.card-header');
+            
+            elements.forEach(element => {
+                if (Math.random() > 0.7) {
+                    setInterval(() => {
+                        element.style.boxShadow = Math.random() > 0.5 ? '0 0 15px rgba(214, 40, 40, 0.7)' : 'none';
+                    }, Math.random() * 2000 + 1000);
+                }
+            });
+        }
+        
+        // Initialize everything
+        window.onload = function() {
+            createStars();
+            startCountdown();
+            animateVisualizations();
+            addRandomBlink();
+            
+            // Add styles to document dynamically
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes twinkle {
+                    0% { opacity: 0.2; }
+                    50% { opacity: 1; }
+                    100% { opacity: 0.2; }
+                }
+            `;
+            document.head.appendChild(style);
+        };
+    </script>
+</body>
+</html>
